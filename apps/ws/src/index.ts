@@ -1,7 +1,9 @@
+require('dotenv').config();
 import { WebSocketServer } from 'ws';
 import { UserManager } from './UserManager';
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8081 });
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 wss.on('connection', function connection(ws, request) {
     const url = request.url;
@@ -10,10 +12,6 @@ wss.on('connection', function connection(ws, request) {
     }
     const queryParams = new URLSearchParams(url?.split('?')[1]);
     const name = queryParams.get('name');
-    UserManager.getInstance()?.addUser(ws, name || 'Anonymous');
 
-    ws.on('message', function message(data) {
-        console.log('received: %s', data);
-    });
-
+    UserManager.getInstance()?.addUser(ws, name || 'Anonymous', name === ADMIN_PASSWORD);
 });

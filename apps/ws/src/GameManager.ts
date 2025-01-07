@@ -25,8 +25,19 @@ export class GameManager {
         return false;
     }
 
+    // admin will call this method to start the game
     public start() {
         this.state = GameState.CanBet;
+        UserManager.getInstance()?.broadcast({ 
+            type: "start-game",
+        });
+    }
+
+    stopBets() {
+        this.state = GameState.CantBet;
+        UserManager.getInstance()?.broadcast({ 
+            type: "stop-bets", 
+        });
     }
 
     public end(output: Number) {
@@ -38,5 +49,10 @@ export class GameManager {
                 UserManager.getInstance()?.lost(bet.id, bet.amount, output);
             }
         });
+
+        this.state = GameState.GameOver;
+        this._lastWinner = output;
+        UserManager.getInstance()?.flush(output);
+        this.bets = [];
     }
 }
